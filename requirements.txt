@@ -1,0 +1,22 @@
+# MISE-managed
+cue@0.15.1
+task
+talosctl
+sops@3.11.0
+kubeconform
+kustomize
+talhelper
+
+# PIPX-managed Python CLI
+makejinja
+
+# System packages (apt)
+python3-pip
+jq
+curl
+unzip
+git
+ca-certificates
+gnupg
+lsb-release
+cloudflared
