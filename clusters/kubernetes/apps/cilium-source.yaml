@@ -7,4 +7,4 @@ spec:
   interval: 1h
   url: oci://quay.io/cilium/charts
   ref:
-    version: "1.16.x" # Or your preferred version
+    semver: ">=1.16.0"
