@@ -24,7 +24,7 @@ spec:
     k8sServiceHost: 127.0.0.1
     k8sServicePort: 7445
 
-    # --- Gateway API & Envoy (The Goal) ---
+    # --- Gateway API & Envoy ---
     gatewayAPI:
       enabled: true
     envoy:
@@ -45,7 +45,7 @@ spec:
       enabled: true
       hostNamespaceOnly: true
 
-    # --- Cleaned Up Metrics (No ServiceMonitors) ---
+    # --- Metrics & Operator Configuration ---
     prometheus:
       enabled: true
       serviceMonitor:
@@ -53,10 +53,13 @@ spec:
     operator:
       replicas: 1
       rollOutPods: true
+      # Corrected syntax for passing the enable flag directly to the binary
+      extraArgs:
+        - "--enable-gateway-api=true"
       prometheus:
         enabled: true
         serviceMonitor:
-          enabled: false # Disabled to prevent CRD errors
+          enabled: false
 
     # --- Talos Specific Cgroup Tweaks ---
     cgroup:
