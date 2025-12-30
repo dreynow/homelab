@@ -71,3 +71,17 @@ spec:
     rollOutCiliumPods: true
     ipam:
       mode: kubernetes
+
+# This allows Cilium to perform the low-level network tasks
+    privileged: true
+
+    securityContext:
+      capabilities:
+        cleanCiliumState:
+          - NET_ADMIN
+          - SYS_ADMIN
+          - SYS_RESOURCE
+
+    # Often required for Ubuntu/AppArmor environments
+    hostNetwork: true
+    hostPID: true
