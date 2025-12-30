@@ -5,86 +5,83 @@ metadata:
   namespace: kube-system
 spec:
   interval: 1h
-  chart:
-    spec:
-      chart: cilium
-      version: "1.16.5"
-      sourceRef:
-        kind: HelmRepository
-        name: cilium
-        namespace: kube-system
+  chartRef:
+    kind: OCIRepository
+    name: cilium
   values:
-    # --- Core Networking ---
-    routingMode: native
-    ipv4NativeRoutingCIDR: "10.42.0.0/16"
     autoDirectNodeRoutes: true
     bpf:
       masquerade: true
-      hostLegacyRouting: true # Essential for Talos
-    k8sServiceHost: 127.0.0.1
-    k8sServicePort: 7445
-
-    # --- Gateway API & Envoy ---
-    gatewayAPI:
+      # Ref: https://github.com/siderolabs/talos/issues/10002
+      hostLegacyRouting: true
+    cni:
+      # Required for pairing with Multus CNI
+      exclusive: false
+    cgroup:
+      autoMount: # Fixed: was automount
+        enabled: false
+      hostRoot: /sys/fs/cgroup
+    # NOTE: devices might need to be set if you have more than one active NIC on your hosts
+    # devices: eno+ eth+
+    dashboards:
+      enabled: true
+    endpointRoutes:
       enabled: true
     envoy:
+      enabled: false
+    gatewayAPI:
+      enabled: false
+    hubble:
+      enabled: false
+    ipam:
+      mode: kubernetes
+    ipv4NativeRoutingCIDR: "10.42.0.0/16"
+    k8sServiceHost: 127.0.0.1
+    k8sServicePort: 7445
+    kubeProxyReplacement: true
+    kubeProxyReplacementHealthzBindAddr: 0.0.0.0:10256
+    l2announcements:
       enabled: true
     loadBalancer:
       algorithm: maglev
       mode: "dsr"
-    l2announcements:
-      enabled: true
-
-    # --- Features & Visibility ---
-    hubble:
-      enabled: true
-    endpointRoutes:
-      enabled: true
     localRedirectPolicy: true
-    socketLB:
-      enabled: true
-      hostNamespaceOnly: true
-
-    # --- Metrics & Operator Configuration ---
-    prometheus:
-      enabled: true
-      serviceMonitor:
-        enabled: false # Disabled to prevent CRD errors
     operator:
-      replicas: 1
-      rollOutPods: true
-      # Corrected syntax for passing the enable flag directly to the binary
-      extraArgs:
-        - "--enable-gateway-api=true"
+      dashboards:
+        enabled: true
       prometheus:
         enabled: true
         serviceMonitor:
-          enabled: false
-
-    # --- Talos Specific Cgroup Tweaks ---
-    cgroup:
-      automount:
-        enabled: false
-      hostRoot: /sys/fs/cgroup
-
-    # --- Performance & Stability ---
+          enabled: true
+      replicas: 1
+      rollOutPods: true
+    prometheus:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+        trustCRDsExist: true
     rollOutCiliumPods: true
-    ipam:
-      mode: kubernetes
-
-# This allows Cilium to perform the low-level network tasks
-    privileged: true
-
+    routingMode: native
     securityContext:
       capabilities:
+        ciliumAgent:
+          - CHOWN
+          - KILL
+          - NET_ADMIN
+          - NET_RAW
+          - IPC_LOCK
+          - SYS_ADMIN
+          - SYS_RESOURCE
+          - PERFMON
+          - BPF
+          - DAC_OVERRIDE
+          - FOWNER
+          - SETGID
+          - SETUID
         cleanCiliumState:
           - NET_ADMIN
           - SYS_ADMIN
           - SYS_RESOURCE
-
-    # Often required for Ubuntu/AppArmor environments
-    hostNetwork: true
-    hostPID: true
-
-    bpf:
-      reprovisionBPFFS: true
+    socketLB:
+      enabled: true
+      hostNamespaceOnly: true
