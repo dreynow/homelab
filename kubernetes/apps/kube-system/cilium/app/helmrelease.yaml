@@ -85,3 +85,6 @@ spec:
     # Often required for Ubuntu/AppArmor environments
     hostNetwork: true
     hostPID: true
+
+    bpf:
+      reprovisionBPFFS: true
